@@ -9,7 +9,11 @@ namespace HoLLy.Memory.Linux
         public ulong End { get; private set; }
         public LinuxMemoryPermissions Permissions { get; private set; }
 
-        // TODO: could include info about mapped files
+        public ulong Offset { get; private set; }
+        public (byte major, byte minor) Device { get; private set; }
+        public ulong Inode { get; private set; }
+        public string? PathName { get; private set; }
+        public bool IsSpecialRegion { get; private set; }
 
         public static LinuxMemoryRegion ParseLine(string line)
         {
@@ -18,12 +22,29 @@ namespace HoLLy.Memory.Linux
 
             var startEnd = split[0].Split('-');
             Debug.Assert(startEnd.Length == 2);
-
-            return new LinuxMemoryRegion {
+            
+            var reg = new LinuxMemoryRegion {
                 Start = Convert.ToUInt64(startEnd[0], 16),
                 End = Convert.ToUInt64(startEnd[1], 16),
                 Permissions = ParseFlags(split[1]),
             };
+
+            // check if file
+            if (split.Length > 5) {
+                reg.Offset = Convert.ToUInt64(split[2], 16);
+
+                var devSplit = split[3].Split(":");
+                Debug.Assert(devSplit.Length == 2);
+                reg.Device = (Convert.ToByte(devSplit[0], 16), Convert.ToByte(devSplit[1], 16));
+                
+                reg.Inode = Convert.ToUInt64(split[4]);
+
+                var path = line[line.GetNthIndex(' ', 5)..].TrimStart(' ');
+                reg.PathName = path;
+                reg.IsSpecialRegion = path.StartsWith('[') && path.EndsWith('[');
+            }
+
+            return reg;
         }
 
         private static LinuxMemoryPermissions ParseFlags(string line)

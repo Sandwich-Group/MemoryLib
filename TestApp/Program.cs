@@ -34,7 +34,10 @@ namespace TestApp
 
                 Console.WriteLine($"Listing regions for PID {proc.Id}.");
                 foreach (var region in proc.MemoryRegions) {
-                    Console.WriteLine($"{region.Start:X}-{region.End:X} {region.Permissions}");
+                    string perms = new string(region.Permissions.ToString().Split(' ').Select(x => x[0]).ToArray());
+                    Console.WriteLine(region.PathName == null
+                        ? $"{region.Start:X}-{region.End:X} {perms}"
+                        : $"{region.Start:X}-{region.End:X} {perms},\t{region.PathName} @{region.Offset:X}");
                 }
             }
         }
