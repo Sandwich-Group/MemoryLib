@@ -12,7 +12,7 @@ namespace HoLLy.Memory.Linux
         public ulong Offset { get; private set; }
         public (byte major, byte minor) Device { get; private set; }
         public ulong Inode { get; private set; }
-        public string? PathName { get; private set; }
+        public string PathName { get; private set; }
         public bool IsSpecialRegion { get; private set; }
 
         public static LinuxMemoryRegion ParseLine(string line)

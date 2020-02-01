@@ -9,7 +9,7 @@ namespace HoLLy.Memory.Linux
     {
         public uint Id { get; }
         public IReadOnlyList<LinuxMemoryRegion> MemoryRegions => memoryRegions?.AsReadOnly() ?? RefreshMemoryRegions();
-        private List<LinuxMemoryRegion>? memoryRegions;
+        private List<LinuxMemoryRegion> memoryRegions;
 
         public LinuxProcess(uint pid)
         {
