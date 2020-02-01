@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using EntryPoint;
 using HoLLy.Memory.Linux;
 
@@ -24,11 +25,9 @@ namespace TestApp
                 if (args.ProcessId != null) {
                     proc = new LinuxProcess(args.ProcessId.Value);
                 }
-                /*
                 else if (args.ProcessName != null) {
-                    throw new NotImplementedException();
+                    proc = LinuxProcess.GetProcessesById(args.ProcessName).Single();
                 }
-                */
                 else {
                     throw new Exception("Please pass a PID with -p");
                 }
@@ -48,10 +47,8 @@ namespace TestApp
             [OptionParameter("pid", 'p')]
             public uint? ProcessId { get; set; }
 
-            /*
             [OptionParameter("name", 'n')]
             public string? ProcessName { get; set; }
-            */
         }
     }
 }

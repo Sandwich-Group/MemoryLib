@@ -6,6 +6,10 @@ namespace HoLLy.Memory.Linux
     public enum LinuxMemoryPermissions
     {
         None = 0,
-        Readable = 1, Writable, Executable, Shared, Private,
+        Readable = 1,
+        Writable = 2,
+        Executable = 4,
+        Shared = 8,
+        Private = 16,
     }
 }
