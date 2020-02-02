@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static HoLLy.Memory.Linux.PInvokes;
 
 namespace HoLLy.Memory.Linux
 {
@@ -29,6 +30,28 @@ namespace HoLLy.Memory.Linux
             memoryRegions.AddRange(File.ReadAllLines(path).Select(LinuxMemoryRegion.ParseLine));
 
             return memoryRegions.AsReadOnly();
+        }
+
+        public unsafe bool Read(UIntPtr address, byte[] buffer, int length)
+        {
+            fixed (byte* ptr = buffer) {
+                var localIo = new IoVec((UIntPtr)ptr, length);
+                var remoteIo = new IoVec(address, length);
+
+                IntPtr res = process_vm_readv((int)Id, ref localIo, 1, ref remoteIo, 1, 0);
+                return res.ToInt64() != -1;
+            }
+        }
+
+        public unsafe bool Write(UIntPtr address, byte[] buffer, int length)
+        {
+            fixed (byte* ptr = buffer) {
+                var localIo = new IoVec((UIntPtr)ptr, length);
+                var remoteIo = new IoVec(address, length);
+
+                IntPtr res = process_vm_writev((int)Id, ref localIo, 1, ref remoteIo, 1, 0);
+                return res.ToInt64() != -1;
+            }
         }
 
         public static IReadOnlyList<LinuxProcess> GetProcessesById(string name, bool caseSensitive = true)

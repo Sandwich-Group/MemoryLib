@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using EntryPoint;
 using HoLLy.Memory.Linux;
 
@@ -40,6 +42,38 @@ namespace TestApp
                         : $"{region.Start:X}-{region.End:X} {perms},\t{region.PathName} @{region.Offset:X}");
                 }
             }
+
+            [Command("dump")]
+            [Help("Dumps a memory region of a given process")]
+            public void DumpRegion(string[] stringArgs)
+            {
+                var args = Cli.Parse<DumpCommand>(stringArgs);
+                LinuxProcess proc;
+                if (args.ProcessId != null) {
+                    proc = new LinuxProcess(args.ProcessId.Value);
+                }
+                else if (args.ProcessName != null) {
+                    proc = LinuxProcess.GetProcessesById(args.ProcessName).Single();
+                }
+                else {
+                    throw new Exception("Please pass a PID with -p");
+                }
+
+                string regionName = args.RegionName ?? "[heap]";
+                var region = proc.MemoryRegions.Single(x => x.PathName?.Equals(regionName, StringComparison.OrdinalIgnoreCase) == true);
+                Console.WriteLine($"Dumping '{regionName}' region ({region.Start:X}-{region.End:X}) to dump.dat for PID {proc.Id}.");
+
+                byte[] buffer = new byte[0x1000];
+                using var file = File.Open("dump.dat", FileMode.Create);
+                for (ulong i = region.Start; i < region.End; i += (ulong)buffer.Length) {
+                    int len = (int)Math.Min((ulong)buffer.Length, region.End - i);
+                    var success = proc.Read(new UIntPtr(i), buffer, len);
+                    if (!success) {
+                        Console.WriteLine($"Read error: {Marshal.GetLastWin32Error()} - {Marshal.GetHRForLastWin32Error()}");
+                    }
+                    file.Write(buffer, 0, len);
+                }
+            }
         }
 
         [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
@@ -51,7 +85,22 @@ namespace TestApp
             public uint? ProcessId { get; set; }
 
             [OptionParameter("name", 'n')]
-            public string? ProcessName { get; set; }
+            public string ProcessName { get; set; }
+        }
+
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
+        private class DumpCommand : BaseCliArguments
+        {
+            public DumpCommand() : base("Dump Memory") { }
+
+            [OptionParameter("pid", 'p')]
+            public uint? ProcessId { get; set; }
+
+            [OptionParameter("name", 'n')]
+            public string ProcessName { get; set; }
+
+            [OptionParameter("region", 'r')]
+            public string RegionName { get; set; }
         }
     }
 }
