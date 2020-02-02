@@ -1,1 +1,0 @@
-To read/write memory without root, add the CAP_SYS_PTRACE capability to the executable: `setcap cap_sys_ptrace+ep <executable>`

@@ -33,7 +33,7 @@ namespace HoLLy.Memory.CrossPlatform
         public static IReadOnlyList<Process> OpenAllByName(string name)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
-                return LinuxProcess.GetProcessesById(name, false);
+                return LinuxProcess.GetProcessesByName(name, false);
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {

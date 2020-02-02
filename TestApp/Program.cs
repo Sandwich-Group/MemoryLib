@@ -28,7 +28,7 @@ namespace TestApp
                     proc = new LinuxProcess(args.ProcessId.Value);
                 }
                 else if (args.ProcessName != null) {
-                    proc = LinuxProcess.GetProcessesById(args.ProcessName).Single();
+                    proc = LinuxProcess.GetProcessesByName(args.ProcessName).Single();
                 }
                 else {
                     throw new Exception("Please pass a PID with -p");
@@ -36,7 +36,7 @@ namespace TestApp
 
                 Console.WriteLine($"Listing regions for PID {proc.Id}.");
                 foreach (var region in proc.GetMemoryRegions()) {
-                    Console.WriteLine(region is LinuxMemoryRegion linuxReg && linuxReg.PathName == null
+                    Console.WriteLine(region is LinuxMemoryRegion linuxReg && linuxReg.PathName != null
                         ? $"{region.Start:X}-{region.End:X} {region.PermissionString},\t{linuxReg.PathName} @{linuxReg.Offset:X}"
                         : $"{region.Start:X}-{region.End:X} {region.PermissionString}"
                     );
@@ -53,7 +53,7 @@ namespace TestApp
                     proc = new LinuxProcess(args.ProcessId.Value);
                 }
                 else if (args.ProcessName != null) {
-                    proc = LinuxProcess.GetProcessesById(args.ProcessName).Single();
+                    proc = LinuxProcess.GetProcessesByName(args.ProcessName).Single();
                 }
                 else {
                     throw new Exception("Please pass a PID with -p");

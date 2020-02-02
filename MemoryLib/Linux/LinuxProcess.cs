@@ -47,7 +47,7 @@ namespace HoLLy.Memory.Linux
             }
         }
 
-        public static IReadOnlyList<LinuxProcess> GetProcessesById(string name, bool caseSensitive = true)
+        public static IReadOnlyList<LinuxProcess> GetProcessesByName(string name, bool caseSensitive = true)
         {
             return Directory.GetDirectories("/proc")
                 .Select(p => {
