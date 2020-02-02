@@ -1,12 +1,13 @@
 using System;
 using System.Diagnostics;
+using HoLLy.Memory.CrossPlatform;
 
 namespace HoLLy.Memory.Linux
 {
-    public struct LinuxMemoryRegion
+    public class LinuxMemoryRegion : MemoryRegion
     {
-        public ulong Start { get; private set; }
-        public ulong End { get; private set; }
+        public override ulong Start { get; }
+        public override ulong End { get; }
         public LinuxMemoryPermissions Permissions { get; private set; }
 
         public ulong Offset { get; private set; }
@@ -14,6 +15,17 @@ namespace HoLLy.Memory.Linux
         public ulong Inode { get; private set; }
         public string PathName { get; private set; }
         public bool IsSpecialRegion { get; private set; }
+
+        public override bool IsReadable => Permissions.HasFlag(LinuxMemoryPermissions.Readable);
+        public override bool IsWriteable => Permissions.HasFlag(LinuxMemoryPermissions.Writable);
+        public override bool IsExecutable => Permissions.HasFlag(LinuxMemoryPermissions.Executable);
+        public override bool IsMapped => PathName != null && !IsSpecialRegion;
+
+        public LinuxMemoryRegion(ulong start, ulong end)
+        {
+            Start = start;
+            End = end;
+        }
 
         public static LinuxMemoryRegion ParseLine(string line)
         {
@@ -23,9 +35,7 @@ namespace HoLLy.Memory.Linux
             var startEnd = split[0].Split('-');
             Debug.Assert(startEnd.Length == 2);
             
-            var reg = new LinuxMemoryRegion {
-                Start = Convert.ToUInt64(startEnd[0], 16),
-                End = Convert.ToUInt64(startEnd[1], 16),
+            var reg = new LinuxMemoryRegion(Convert.ToUInt64(startEnd[0], 16),Convert.ToUInt64(startEnd[1], 16)) {
                 Permissions = ParseFlags(split[1]),
             };
 
