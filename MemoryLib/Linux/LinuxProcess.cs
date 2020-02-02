@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using HoLLy.Memory.CrossPlatform;
 using static HoLLy.Memory.Linux.PInvokes;
 
 namespace HoLLy.Memory.Linux
 {
-    public class LinuxProcess
+    public class LinuxProcess : Process
     {
         public uint Id { get; }
         public IReadOnlyList<LinuxMemoryRegion> MemoryRegions => memoryRegions?.AsReadOnly() ?? RefreshMemoryRegions();
@@ -32,7 +33,7 @@ namespace HoLLy.Memory.Linux
             return memoryRegions.AsReadOnly();
         }
 
-        public unsafe bool Read(UIntPtr address, byte[] buffer, int length)
+        public override unsafe bool TryRead(UIntPtr address, byte[] buffer, int length)
         {
             fixed (byte* ptr = buffer) {
                 var localIo = new IoVec((UIntPtr)ptr, length);
@@ -43,7 +44,7 @@ namespace HoLLy.Memory.Linux
             }
         }
 
-        public unsafe bool Write(UIntPtr address, byte[] buffer, int length)
+        public override unsafe bool TryWrite(UIntPtr address, byte[] buffer, int length)
         {
             fixed (byte* ptr = buffer) {
                 var localIo = new IoVec((UIntPtr)ptr, length);

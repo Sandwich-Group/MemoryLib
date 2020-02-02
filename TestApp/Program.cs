@@ -19,7 +19,7 @@ namespace TestApp
         private class CliCommands : BaseCliCommands
         {
             [Command("regions")]
-            [Help("Show the memory regions of a given process")]
+            [Help("Show the memory regions of a given linux process")]
             public void ShowRegions(string[] stringArgs)
             {
                 var args = Cli.Parse<RegionsCommand>(stringArgs);
@@ -44,7 +44,7 @@ namespace TestApp
             }
 
             [Command("dump")]
-            [Help("Dumps a memory region of a given process")]
+            [Help("Dumps a memory region of a given linux process")]
             public void DumpRegion(string[] stringArgs)
             {
                 var args = Cli.Parse<DumpCommand>(stringArgs);
@@ -67,7 +67,7 @@ namespace TestApp
                 using var file = File.Open("dump.dat", FileMode.Create);
                 for (ulong i = region.Start; i < region.End; i += (ulong)buffer.Length) {
                     int len = (int)Math.Min((ulong)buffer.Length, region.End - i);
-                    var success = proc.Read(new UIntPtr(i), buffer, len);
+                    var success = proc.TryRead(new UIntPtr(i), buffer, len);
                     if (!success) {
                         Console.WriteLine($"Read error: {Marshal.GetLastWin32Error()} - {Marshal.GetHRForLastWin32Error()}");
                     }

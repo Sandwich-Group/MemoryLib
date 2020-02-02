@@ -1,28 +1,34 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using HoLLy.Memory.CrossPlatform;
 using static HoLLy.Memory.Windows.Native;
 using static HoLLy.Memory.Windows.NativeHelper;
 
 namespace HoLLy.Memory.Windows
 {
-    public class WindowsProcess : IDisposable
+    public class WindowsProcess : Process, IDisposable
     {
         public uint Id { get; }
-        public IntPtr Handle { get; }
+        public IntPtr Handle => handle ??= OpenProcess(accessFlags, 0, Id);
+        private IntPtr? handle;
+        private readonly ProcessAccessFlags accessFlags;
 
-        public WindowsProcess(uint pid, ProcessAccessFlags accessFlags = ProcessAccessFlags.All)
+        public WindowsProcess(uint pid, ProcessAccessFlags accessFlags = ProcessAccessFlags.All, bool lazy = false)
         {
             Id = pid;
-            Handle = OpenProcess(accessFlags, 0, pid);
+            this.accessFlags = accessFlags;
+            if (!lazy) {
+                handle = OpenProcess(accessFlags, 0, pid);
+            }
         }
 
-        public bool Read(UIntPtr address, byte[] buffer, int length)
+        public override bool TryRead(UIntPtr address, byte[] buffer, int length)
         {
             return ReadProcessMemory(Handle, address, buffer, length, out _);
         }
 
-        public bool Write(UIntPtr address, byte[] buffer, int length)
+        public override bool TryWrite(UIntPtr address, byte[] buffer, int length)
         {
             return WriteProcessMemory(Handle, address, buffer, length, out _);
         }
