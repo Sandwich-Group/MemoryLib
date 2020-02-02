@@ -9,17 +9,17 @@ namespace HoLLy.Memory.Linux
     {
         [DllImport("libc", SetLastError = true)]
         public static extern IntPtr process_vm_readv(int pid,
-                                                     ref IoVec local_iov,
+                                                     in IoVec local_iov,
                                                      ulong liovcnt,
-                                                     ref IoVec remote_iov,
+                                                     in IoVec remote_iov,
                                                      ulong riovcnt,
                                                      ulong flags);
 
         [DllImport("libc", SetLastError = true)]
         public static extern IntPtr process_vm_writev(int pid,
-                                                      ref IoVec local_iov,
+                                                      in IoVec local_iov,
                                                       ulong liovcnt,
-                                                      ref IoVec remote_iov,
+                                                      in IoVec remote_iov,
                                                       ulong riovcnt,
                                                       ulong flags);
 

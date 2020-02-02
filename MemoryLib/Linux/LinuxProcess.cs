@@ -38,7 +38,7 @@ namespace HoLLy.Memory.Linux
                 var localIo = new IoVec((UIntPtr)ptr, length);
                 var remoteIo = new IoVec(address, length);
 
-                IntPtr res = process_vm_readv((int)Id, ref localIo, 1, ref remoteIo, 1, 0);
+                IntPtr res = process_vm_readv((int)Id, in localIo, 1, in remoteIo, 1, 0);
                 return res.ToInt64() != -1;
             }
         }
@@ -49,7 +49,7 @@ namespace HoLLy.Memory.Linux
                 var localIo = new IoVec((UIntPtr)ptr, length);
                 var remoteIo = new IoVec(address, length);
 
-                IntPtr res = process_vm_writev((int)Id, ref localIo, 1, ref remoteIo, 1, 0);
+                IntPtr res = process_vm_writev((int)Id, in localIo, 1, in remoteIo, 1, 0);
                 return res.ToInt64() != -1;
             }
         }
