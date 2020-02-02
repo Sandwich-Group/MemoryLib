@@ -19,7 +19,7 @@ namespace TestApp
         private class CliCommands : BaseCliCommands
         {
             [Command("regions")]
-            [Help("Show the memory regions of a given linux process")]
+            [Help("Show the memory regions of a given process")]
             public void ShowRegions(string[] stringArgs)
             {
                 var args = Cli.Parse<RegionsCommand>(stringArgs);
@@ -35,11 +35,11 @@ namespace TestApp
                 }
 
                 Console.WriteLine($"Listing regions for PID {proc.Id}.");
-                foreach (var region in proc.MemoryRegions) {
-                    string perms = new string(region.Permissions.ToString().Split(' ').Select(x => x[0]).ToArray());
-                    Console.WriteLine(region.PathName == null
-                        ? $"{region.Start:X}-{region.End:X} {perms}"
-                        : $"{region.Start:X}-{region.End:X} {perms},\t{region.PathName} @{region.Offset:X}");
+                foreach (var region in proc.GetMemoryRegions()) {
+                    Console.WriteLine(region is LinuxMemoryRegion linuxReg && linuxReg.PathName == null
+                        ? $"{region.Start:X}-{region.End:X} {region.PermissionString},\t{linuxReg.PathName} @{linuxReg.Offset:X}"
+                        : $"{region.Start:X}-{region.End:X} {region.PermissionString}"
+                    );
                 }
             }
 
@@ -60,7 +60,7 @@ namespace TestApp
                 }
 
                 string regionName = args.RegionName ?? "[heap]";
-                var region = proc.MemoryRegions.Single(x => x.PathName?.Equals(regionName, StringComparison.OrdinalIgnoreCase) == true);
+                var region = proc.GetMemoryRegions().Single(x => (x as LinuxMemoryRegion)?.PathName?.Equals(regionName, StringComparison.OrdinalIgnoreCase) == true);
                 Console.WriteLine($"Dumping '{regionName}' region ({region.Start:X}-{region.End:X}) to dump.dat for PID {proc.Id}.");
 
                 byte[] buffer = new byte[0x1000];

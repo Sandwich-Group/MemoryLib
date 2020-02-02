@@ -5,13 +5,17 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using HoLLy.Memory.Linux;
+using HoLLy.Memory.Scanning;
 using HoLLy.Memory.Windows;
 
 namespace HoLLy.Memory.CrossPlatform
 {
     public abstract class Process
     {
+        // TODO: allow big endian?
+
         private readonly byte[] readBuffer = new byte[16];
+        public abstract uint Id { get; }
 
         public static Process Open(uint pid)
         {
@@ -41,6 +45,7 @@ namespace HoLLy.Memory.CrossPlatform
 
         public abstract bool TryRead(UIntPtr address, byte[] buffer, int length);
         public abstract bool TryWrite(UIntPtr address, byte[] buffer, int length);
+        public abstract IReadOnlyList<MemoryRegion> GetMemoryRegions();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Read(UIntPtr address, byte[] buffer, int length)
@@ -57,9 +62,6 @@ namespace HoLLy.Memory.CrossPlatform
                 throw new Exception($"Writing {length} bytes at address {address.ToUInt64():X} failed");
             }
         }
-
-        // TODO: enumerate memory regions
-        // TODO: allow big endian?
 
         /// <summary> Read bytes into a new buffer. </summary>
         public byte[] ReadBytes(UIntPtr address, int length)
@@ -128,6 +130,7 @@ namespace HoLLy.Memory.CrossPlatform
         /// <summary> Writes the bytes of a string without null terminator, using a given encoding. Uses UTF-8 by default. </summary>
         public void WriteString(UIntPtr address, string value, Encoding encoding = null) => Write(address, (encoding ?? Encoding.UTF8).GetBytes(value));
 
-        // TODO: pattern scan
+        public bool Scan(PatternByte[] pattern, bool? mapped, out UIntPtr result) => PatternScanner.Scan(this, pattern, mapped, out result);
+        public bool Scan(PatternByte[] pattern, UIntPtr baseAddress, ulong size, out UIntPtr result) => PatternScanner.Scan(this, pattern, baseAddress, size, out result);
     }
 }

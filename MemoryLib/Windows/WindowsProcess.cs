@@ -9,7 +9,7 @@ namespace HoLLy.Memory.Windows
 {
     public class WindowsProcess : Process, IDisposable
     {
-        public uint Id { get; }
+        public override uint Id { get; }
         public IntPtr Handle => handle ??= OpenProcess(accessFlags, 0, Id);
         private IntPtr? handle;
         private readonly ProcessAccessFlags accessFlags;
@@ -33,8 +33,10 @@ namespace HoLLy.Memory.Windows
             return WriteProcessMemory(Handle, address, buffer, length, out _);
         }
 
-        public IEnumerable<WindowsMemoryRegion> EnumerateRegions(ulong maxSize = ulong.MaxValue)
+        public override IReadOnlyList<MemoryRegion> GetMemoryRegions()
         {
+            var list = new List<WindowsMemoryRegion>();
+            const ulong maxSize = ulong.MaxValue;
             ulong address = 0;
             bool x64 = Is64BitProcess(Handle);
             do
@@ -48,11 +50,14 @@ namespace HoLLy.Memory.Windows
                     VirtualQueryEx32(Handle, (UIntPtr)address, out MemoryBasicInformation32 m32, (uint)Marshal.SizeOf(typeof(MemoryBasicInformation32)));
                     m = new WindowsMemoryRegion(m32);
                 }
-                yield return m;
+                list.Add(m);
+
                 if (address == m.BaseAddress + m.RegionSize)
                     break;
                 address = m.BaseAddress + m.RegionSize;
-            } while (address <= maxSize);
+            } while (address < maxSize);
+
+            return list.AsReadOnly();
         }
 
         #region Dispose implementation

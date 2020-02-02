@@ -29,6 +29,8 @@ namespace HoLLy.Memory.Windows
 
         public override bool IsMapped => Type.HasFlag(WindowsMemoryType.MemMapped) || Type.HasFlag(WindowsMemoryType.MemImage);
 
+        internal override bool IsInUse => State.HasFlag(WindowsMemoryState.MemCommit);
+
         internal WindowsMemoryRegion(Native.MemoryBasicInformation32 m)
         {
             BaseAddress = m.BaseAddress;

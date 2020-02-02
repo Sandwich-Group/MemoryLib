@@ -9,10 +9,7 @@ namespace HoLLy.Memory.Linux
 {
     public class LinuxProcess : Process
     {
-        public uint Id { get; }
-        public IReadOnlyList<LinuxMemoryRegion> MemoryRegions => memoryRegions?.AsReadOnly() ?? RefreshMemoryRegions();
-        private List<LinuxMemoryRegion> memoryRegions;
-
+        public override uint Id { get; }
         public LinuxProcess(uint pid)
         {
             Id = pid;
@@ -22,15 +19,10 @@ namespace HoLLy.Memory.Linux
             }
         }
 
-        public IReadOnlyList<LinuxMemoryRegion> RefreshMemoryRegions()
+        public override IReadOnlyList<MemoryRegion> GetMemoryRegions()
         {
-            memoryRegions ??= new List<LinuxMemoryRegion>();
-            memoryRegions.Clear();
-
             string path = Path.Combine("/proc", Id.ToString(), "maps");
-            memoryRegions.AddRange(File.ReadAllLines(path).Select(LinuxMemoryRegion.ParseLine));
-
-            return memoryRegions.AsReadOnly();
+            return File.ReadAllLines(path).Select(LinuxMemoryRegion.ParseLine).ToList().AsReadOnly();
         }
 
         public override unsafe bool TryRead(UIntPtr address, byte[] buffer, int length)
