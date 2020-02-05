@@ -11,7 +11,6 @@ namespace HoLLy.Memory.Windows
         public WindowsMemoryState State { get; }
         public WindowsAllocationProtect Protect { get; }
         public WindowsMemoryType Type { get; }
-        public bool IsInUse => !State.HasFlag(WindowsMemoryState.MemFree);
 
         public bool IsReadable => Protect.HasFlag(WindowsAllocationProtect.PageReadonly) ||
             Protect.HasFlag(WindowsAllocationProtect.PageReadWrite) |

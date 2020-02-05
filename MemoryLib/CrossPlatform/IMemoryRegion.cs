@@ -9,7 +9,6 @@ namespace HoLLy.Memory.CrossPlatform
         bool IsWriteable { get; }
         bool IsExecutable { get; }
         bool IsMapped { get; }
-        bool IsInUse { get; }
 
         public string PermissionString => (IsReadable ? "R" : "") + (IsWriteable ? "W" : "") + (IsExecutable ? "X" : "");
     }

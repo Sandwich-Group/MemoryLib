@@ -20,7 +20,7 @@ namespace HoLLy.Memory.Scanning
         {
             result = default;
 
-            foreach (var region in proc.GetMemoryRegions().Where(x => x.IsInUse && (!mapped.HasValue || x.IsMapped == mapped.Value))) {
+            foreach (var region in proc.GetMemoryRegions().Where(x => !mapped.HasValue || x.IsMapped == mapped.Value)) {
                 if (Scan(proc, pattern, new UIntPtr(region.Start), (uint)(region.End - region.Start), out result))
                     return true;
             }

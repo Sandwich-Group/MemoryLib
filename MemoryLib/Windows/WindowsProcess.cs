@@ -50,7 +50,10 @@ namespace HoLLy.Memory.Windows
                     VirtualQueryEx32(Handle, (UIntPtr)address, out MemoryBasicInformation32 m32, (uint)Marshal.SizeOf(typeof(MemoryBasicInformation32)));
                     m = new WindowsMemoryRegion(m32);
                 }
-                list.Add(m);
+
+                if (!m.State.HasFlag(WindowsMemoryState.MemFree)) {
+                    list.Add(m);
+                }
 
                 if (address == m.BaseAddress + m.RegionSize)
                     break;

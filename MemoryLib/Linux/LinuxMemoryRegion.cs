@@ -20,7 +20,6 @@ namespace HoLLy.Memory.Linux
         public bool IsWriteable => Permissions.HasFlag(LinuxMemoryPermissions.Writable);
         public bool IsExecutable => Permissions.HasFlag(LinuxMemoryPermissions.Executable);
         public bool IsMapped => PathName != null && !IsSpecialRegion;
-        public bool IsInUse => true; // /proc/pid/maps doesn't contain free regions
 
         public LinuxMemoryRegion(ulong start, ulong end)
         {
