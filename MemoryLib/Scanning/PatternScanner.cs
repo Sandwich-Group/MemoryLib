@@ -4,7 +4,7 @@ using HoLLy.Memory.CrossPlatform;
 
 namespace HoLLy.Memory.Scanning
 {
-    public class PatternScanner
+    public static class PatternScanner
     {
         private const int ScanStep = 0x1000;
 

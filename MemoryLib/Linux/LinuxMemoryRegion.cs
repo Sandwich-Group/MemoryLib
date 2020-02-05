@@ -4,10 +4,10 @@ using HoLLy.Memory.CrossPlatform;
 
 namespace HoLLy.Memory.Linux
 {
-    public class LinuxMemoryRegion : MemoryRegion
+    public class LinuxMemoryRegion : IMemoryRegion
     {
-        public override ulong Start { get; }
-        public override ulong End { get; }
+        public ulong Start { get; }
+        public ulong End { get; }
         public LinuxMemoryPermissions Permissions { get; private set; }
 
         public ulong Offset { get; private set; }
@@ -16,10 +16,11 @@ namespace HoLLy.Memory.Linux
         public string PathName { get; private set; }
         public bool IsSpecialRegion { get; private set; }
 
-        public override bool IsReadable => Permissions.HasFlag(LinuxMemoryPermissions.Readable);
-        public override bool IsWriteable => Permissions.HasFlag(LinuxMemoryPermissions.Writable);
-        public override bool IsExecutable => Permissions.HasFlag(LinuxMemoryPermissions.Executable);
-        public override bool IsMapped => PathName != null && !IsSpecialRegion;
+        public bool IsReadable => Permissions.HasFlag(LinuxMemoryPermissions.Readable);
+        public bool IsWriteable => Permissions.HasFlag(LinuxMemoryPermissions.Writable);
+        public bool IsExecutable => Permissions.HasFlag(LinuxMemoryPermissions.Executable);
+        public bool IsMapped => PathName != null && !IsSpecialRegion;
+        public bool IsInUse => true; // /proc/pid/maps doesn't contain free regions
 
         public LinuxMemoryRegion(ulong start, ulong end)
         {

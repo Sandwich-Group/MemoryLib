@@ -45,7 +45,7 @@ namespace HoLLy.Memory.CrossPlatform
 
         public abstract bool TryRead(UIntPtr address, byte[] buffer, int length);
         public abstract bool TryWrite(UIntPtr address, byte[] buffer, int length);
-        public abstract IReadOnlyList<MemoryRegion> GetMemoryRegions();
+        public abstract IReadOnlyList<IMemoryRegion> GetMemoryRegions();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Read(UIntPtr address, byte[] buffer, int length)

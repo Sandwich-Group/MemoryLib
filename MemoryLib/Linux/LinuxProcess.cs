@@ -19,7 +19,7 @@ namespace HoLLy.Memory.Linux
             }
         }
 
-        public override IReadOnlyList<MemoryRegion> GetMemoryRegions()
+        public override IReadOnlyList<IMemoryRegion> GetMemoryRegions()
         {
             string path = Path.Combine("/proc", Id.ToString(), "maps");
             return File.ReadAllLines(path).Select(LinuxMemoryRegion.ParseLine).ToList().AsReadOnly();

@@ -33,7 +33,7 @@ namespace HoLLy.Memory.Windows
             return WriteProcessMemory(Handle, address, buffer, length, out _);
         }
 
-        public override IReadOnlyList<MemoryRegion> GetMemoryRegions()
+        public override IReadOnlyList<IMemoryRegion> GetMemoryRegions()
         {
             var list = new List<WindowsMemoryRegion>();
             const ulong maxSize = ulong.MaxValue;
