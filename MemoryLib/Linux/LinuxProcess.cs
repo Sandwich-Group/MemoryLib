@@ -10,6 +10,7 @@ namespace HoLLy.Memory.Linux
     public class LinuxProcess : Process
     {
         public override uint Id { get; }
+
         public LinuxProcess(uint pid)
         {
             Id = pid;
@@ -17,12 +18,6 @@ namespace HoLLy.Memory.Linux
             if (!Directory.Exists(Path.Combine("/proc", pid.ToString()))) {
                 throw new Exception($"Process with pid {pid} does not exist.");
             }
-        }
-
-        public override IReadOnlyList<IMemoryRegion> GetMemoryRegions()
-        {
-            string path = Path.Combine("/proc", Id.ToString(), "maps");
-            return File.ReadAllLines(path).Select(LinuxMemoryRegion.ParseLine).ToList().AsReadOnly();
         }
 
         public override unsafe bool TryRead(UIntPtr address, byte[] buffer, int length)
@@ -45,6 +40,22 @@ namespace HoLLy.Memory.Linux
                 IntPtr res = process_vm_writev((int)Id, in localIo, 1, in remoteIo, 1, 0);
                 return res.ToInt64() != -1;
             }
+        }
+
+        public override IReadOnlyList<IMemoryRegion> GetMemoryRegions()
+        {
+            string path = Path.Combine("/proc", Id.ToString(), "maps");
+            return File.ReadAllLines(path).Select(LinuxMemoryRegion.ParseLine).ToList().AsReadOnly();
+        }
+
+        public override IReadOnlyList<IProcessModule> GetModules()
+        {
+            return GetMemoryRegions()
+                .Cast<LinuxMemoryRegion>()
+                .GroupBy(x => x.PathName)
+                .Where(grouping => !grouping.First().IsSpecialRegion && grouping.First().PathName != null)
+                .Select(grouping => new LinuxProcessModule(grouping.Min(reg => reg.Start), grouping.Key))
+                .ToList().AsReadOnly();
         }
 
         public static IReadOnlyList<LinuxProcess> GetProcessesByName(string name, bool caseSensitive = true)

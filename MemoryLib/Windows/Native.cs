@@ -2,6 +2,7 @@ using System;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 
 namespace HoLLy.Memory.Windows
 {
@@ -27,6 +28,12 @@ namespace HoLLy.Memory.Windows
 
         [DllImport("kernel32.dll", EntryPoint = "VirtualQueryEx")]
         public static extern int VirtualQueryEx64(IntPtr hProcess, UIntPtr lpAddress, out MemoryBasicInformation64 lpBuffer, uint dwLength);
+
+        [DllImport("psapi.dll")]
+        public static extern bool EnumProcessModulesEx(IntPtr hProcess, [Out] IntPtr[] lphModule, int sz, out int one, int two);
+
+        [DllImport("psapi.dll")]
+        public static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName,  int nSize);
 
         [DllImport("kernel32.dll", CallingConvention = CallingConvention.Winapi)]
         public static extern bool IsWow64Process(IntPtr processHandle, out bool wow64Process);

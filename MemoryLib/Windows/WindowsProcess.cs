@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using HoLLy.Memory.CrossPlatform;
 using static HoLLy.Memory.Windows.Native;
 using static HoLLy.Memory.Windows.NativeHelper;
@@ -13,6 +15,11 @@ namespace HoLLy.Memory.Windows
         public IntPtr Handle => handle ??= OpenProcess(accessFlags, 0, Id);
         private IntPtr? handle;
         private readonly ProcessAccessFlags accessFlags;
+        
+        // cached for GetModules
+        private static IntPtr[] modulesBuffer;
+        private const int StringBuilderCapacity = 1024;
+        private readonly StringBuilder stringBuilder = new StringBuilder(StringBuilderCapacity);
 
         public WindowsProcess(uint pid, ProcessAccessFlags accessFlags = ProcessAccessFlags.All, bool lazy = false)
         {
@@ -61,6 +68,24 @@ namespace HoLLy.Memory.Windows
             } while (address < maxSize);
 
             return list.AsReadOnly();
+        }
+
+        public override IReadOnlyList<IProcessModule> GetModules()
+        {
+            const int defaultArraySize = 256;
+            modulesBuffer ??= new IntPtr[defaultArraySize];
+            EnumProcessModulesEx(Handle, modulesBuffer, modulesBuffer.Length * IntPtr.Size, out int found, 3);
+
+            // if our array was too small, try again with correct size
+            if (found/IntPtr.Size > modulesBuffer.Length) {
+                modulesBuffer = new IntPtr[found/IntPtr.Size];
+                EnumProcessModulesEx(Handle, modulesBuffer, found, out found, 3);
+            }
+
+            return modulesBuffer.Take(found / IntPtr.Size).Select(hMod => {
+                GetModuleFileNameEx(Handle, hMod, stringBuilder, StringBuilderCapacity);
+                return new WindowsProcessModule(hMod, stringBuilder.ToString());
+            }).ToList().AsReadOnly();
         }
 
         #region Dispose implementation
