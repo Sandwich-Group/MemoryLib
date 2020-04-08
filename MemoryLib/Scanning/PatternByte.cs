@@ -33,7 +33,7 @@ namespace HoLLy.Memory.Scanning
             int byteCount = withoutSpaces.Length / 2;
             var arr = new PatternByte[byteCount];
             for (int i = 0; i < byteCount; i++)
-                arr[i] = byte.TryParse(withoutSpaces.Substring(i * 2, 2), NumberStyles.None, CultureInfo.InvariantCulture, out byte b)
+                arr[i] = byte.TryParse(withoutSpaces.Substring(i * 2, 2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out byte b)
                     ? Normal(b)
                     : Wildcard;
 
