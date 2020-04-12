@@ -43,6 +43,10 @@ namespace HoLLy.Memory.CrossPlatform
             throw new NotSupportedException("Current platform is not supported");
         }
 
+        public bool Is64Bit => is64Bit ??= CheckIs64Bit();
+        private bool? is64Bit;
+        protected abstract bool CheckIs64Bit();
+        
         public abstract bool TryRead(ulong address, byte[] buffer, int length);
         public abstract bool TryWrite(ulong address, byte[] buffer, int length);
         public abstract IReadOnlyList<IMemoryRegion> GetMemoryRegions();

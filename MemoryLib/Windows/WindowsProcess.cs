@@ -30,9 +30,10 @@ namespace HoLLy.Memory.Windows
             }
         }
 
+        protected override bool CheckIs64Bit() => Is64BitProcess(Handle);
+
         public override bool TryRead(ulong address, byte[] buffer, int length)
         {
-            
             return ReadProcessMemory(Handle, Utils.UnsafeConvertToPointer(address), buffer, length, out _);
         }
 
@@ -46,7 +47,7 @@ namespace HoLLy.Memory.Windows
             var list = new List<WindowsMemoryRegion>();
             const ulong maxSize = ulong.MaxValue;
             ulong address = 0;
-            bool x64 = Is64BitProcess(Handle);
+            bool x64 = Is64Bit;
             do
             {
                 WindowsMemoryRegion m;

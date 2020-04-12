@@ -20,6 +20,26 @@ namespace HoLLy.Memory.Linux
             }
         }
 
+        /// <remarks> As described by https://unix.stackexchange.com/a/106235 </remarks>
+        protected override bool CheckIs64Bit()
+        {
+            byte[] buffer = new byte[16];
+            using var fs = File.OpenRead(Path.Combine("/proc", Id.ToString(), "auxv"));
+
+            while (fs.Position < fs.Length) {
+                var read = fs.Read(buffer, 0, 16);
+
+                if (read != 16)
+                    return true; // assuming end of stream
+
+                if (buffer[4] != 0 || buffer[5] != 0 || buffer[6] != 0 || buffer[7] != 0)
+                    return false;
+            }
+
+            // end of stream
+            return true;
+        }
+
         public override unsafe bool TryRead(ulong address, byte[] buffer, int length)
         {
             fixed (byte* ptr = buffer) {
