@@ -30,14 +30,15 @@ namespace HoLLy.Memory.Windows
             }
         }
 
-        public override bool TryRead(UIntPtr address, byte[] buffer, int length)
+        public override bool TryRead(ulong address, byte[] buffer, int length)
         {
-            return ReadProcessMemory(Handle, address, buffer, length, out _);
+            
+            return ReadProcessMemory(Handle, Utils.UnsafeConvertToPointer(address), buffer, length, out _);
         }
 
-        public override bool TryWrite(UIntPtr address, byte[] buffer, int length)
+        public override bool TryWrite(ulong address, byte[] buffer, int length)
         {
-            return WriteProcessMemory(Handle, address, buffer, length, out _);
+            return WriteProcessMemory(Handle, Utils.UnsafeConvertToPointer(address), buffer, length, out _);
         }
 
         public override IReadOnlyList<IMemoryRegion> GetMemoryRegions()

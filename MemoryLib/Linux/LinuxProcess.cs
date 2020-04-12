@@ -20,10 +20,10 @@ namespace HoLLy.Memory.Linux
             }
         }
 
-        public override unsafe bool TryRead(UIntPtr address, byte[] buffer, int length)
+        public override unsafe bool TryRead(ulong address, byte[] buffer, int length)
         {
             fixed (byte* ptr = buffer) {
-                var localIo = new IoVec((UIntPtr)ptr, length);
+                var localIo = new IoVec((ulong)ptr, length);
                 var remoteIo = new IoVec(address, length);
 
                 IntPtr res = process_vm_readv((int)Id, in localIo, 1, in remoteIo, 1, 0);
@@ -31,10 +31,10 @@ namespace HoLLy.Memory.Linux
             }
         }
 
-        public override unsafe bool TryWrite(UIntPtr address, byte[] buffer, int length)
+        public override unsafe bool TryWrite(ulong address, byte[] buffer, int length)
         {
             fixed (byte* ptr = buffer) {
-                var localIo = new IoVec((UIntPtr)ptr, length);
+                var localIo = new IoVec((ulong)ptr, length);
                 var remoteIo = new IoVec(address, length);
 
                 IntPtr res = process_vm_writev((int)Id, in localIo, 1, in remoteIo, 1, 0);

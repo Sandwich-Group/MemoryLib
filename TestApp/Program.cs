@@ -67,7 +67,7 @@ namespace TestApp
                 using var file = File.Open("dump.dat", FileMode.Create);
                 for (ulong i = region.Start; i < region.End; i += (ulong)buffer.Length) {
                     int len = (int)Math.Min((ulong)buffer.Length, region.End - i);
-                    var success = proc.TryRead(new UIntPtr(i), buffer, len);
+                    var success = proc.TryRead(i, buffer, len);
                     if (!success) {
                         Console.WriteLine($"Read error: {Marshal.GetLastWin32Error()} - {Marshal.GetHRForLastWin32Error()}");
                     }

@@ -29,9 +29,9 @@ namespace HoLLy.Memory.Linux
             public UIntPtr iov_base;
             public int iov_len;
 
-            public IoVec(UIntPtr iovBase, int iovLen)
+            public IoVec(ulong iovBase, int iovLen)
             {
-                iov_base = iovBase;
+                iov_base = Utils.UnsafeConvertToPointer(iovBase);
                 iov_len = iovLen;
             }
         }

@@ -16,12 +16,12 @@ namespace HoLLy.Memory.Scanning
         /// <param name="mapped">Optionally check if region is mapped or not</param>
         /// <param name="result">The address (on success)</param>
         /// <returns>Whether the scan was successful or not</returns>
-        public static bool Scan(Process proc, PatternByte[] pattern, bool? mapped, out UIntPtr result)
+        public static bool Scan(Process proc, PatternByte[] pattern, bool? mapped, out ulong result)
         {
             result = default;
 
             foreach (var region in proc.GetMemoryRegions().Where(x => !mapped.HasValue || x.IsMapped == mapped.Value)) {
-                if (Scan(proc, pattern, new UIntPtr(region.Start), (uint)(region.End - region.Start), out result))
+                if (Scan(proc, pattern, region.Start, (uint)(region.End - region.Start), out result))
                     return true;
             }
 
@@ -37,12 +37,12 @@ namespace HoLLy.Memory.Scanning
         /// <param name="size">The size of the region to scan</param>
         /// <param name="result">The address (on success)</param>
         /// <returns>Whether the scan was successful or not</returns>
-        public static bool Scan(Process proc, PatternByte[] pattern, UIntPtr baseAddress, ulong size, out UIntPtr result)
+        public static bool Scan(Process proc, PatternByte[] pattern, ulong baseAddress, ulong size, out ulong result)
         {
             result = default;
 
             uint step = (uint)Math.Min(size, ScanStep);
-            ulong min = baseAddress.ToUInt64();
+            ulong min = baseAddress;
             ulong max = min + size;
             byte[] buffer = new byte[step + pattern.Length - 1];
 
@@ -52,7 +52,7 @@ namespace HoLLy.Memory.Scanning
             for (ulong i = min; i < max; i += step) {
                 // read buffer
                 // TODO: limit to not go outside region?
-                proc.Read(new UIntPtr(i), buffer, buffer.Length);
+                proc.Read(i, buffer, buffer.Length);
 
                 // loop through buffer
                 for (uint j = 0; j < step; ++j) {
@@ -66,7 +66,7 @@ namespace HoLLy.Memory.Scanning
                     }
 
                     if (match) {
-                        result = (UIntPtr)(i + j);
+                        result = (ulong)(i + j);
                         return true;
                     }
                 }
